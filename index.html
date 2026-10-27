@@ -568,7 +568,415 @@ window.addEventListener("beforeunload",()=>{
 });
 status("WD CapCut tool library loaded.");
 })();
+
+<style>
+/* WD CAPCUT TOOL LIBRARY */
+#wdStudio{font-family:system-ui,sans-serif;color:#fff;background:#101017;padding:14px;border-radius:16px;margin:16px 0 100px}
+#wdStudio *{box-sizing:border-box}
+#wdStudio button,#wdStudio input,#wdStudio textarea,#wdStudio select{font:inherit}
+#wdStudio button{color:#fff;background:#262633;border:1px solid #414153;border-radius:11px;padding:10px;cursor:pointer}
+#wdStudio button:active{transform:scale(.97)}
+#wdStudio .wdPrimary{background:linear-gradient(110deg,#06b6f5,#a855f7);border:0;font-weight:800}
+#wdStudio .wdTitle{font-size:19px;font-weight:900;margin-bottom:5px}
+#wdStudio .wdSub{color:#aaaabd;font-size:12px;margin-bottom:13px}
+#wdStudio .wdSearch,#wdStudio textarea,#wdStudio input[type=text],#wdStudio select{width:100%;background:#171720;color:white;border:1px solid #424252;border-radius:10px;padding:11px}
+#wdStudio .wdGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:10px}
+#wdStudio .wdTool{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:73px;padding:6px 2px!important;text-align:center;font-size:10px;overflow-wrap:anywhere}
+#wdStudio .wdEmoji{font-size:22px}
+#wdStudio .wdPanel{background:#191922;border:1px solid #383847;border-radius:12px;padding:12px;margin-top:12px}
+#wdStudio .wdPanel label{display:block;color:#c3c3d1;font-size:12px;margin:10px 0 5px}
+#wdStudio .wdPanel input[type=range]{width:100%;accent-color:#c084fc}
+#wdStudio .wdPanel button{margin:4px}
+#wdStudio .wdStatus{color:#d8b4fe;font-size:12px;min-height:20px;margin-top:10px}
+#wdStudio .wdBottom{position:fixed;bottom:0;left:0;right:0;z-index:9998;background:#17171df5;border-top:1px solid #414153;padding:8px 8px max(8px,env(safe-area-inset-bottom))}
+#wdStudio .wdHint{font-size:10px;color:#aaaabd;margin:0 0 5px 4px}
+#wdStudio .wdScroll{display:flex;gap:7px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
+#wdStudio .wdScroll button{flex:0 0 68px;min-height:58px;padding:5px 2px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px}
+#wdStudio .wdScroll .wdEmoji{font-size:20px}
+#wdStudio .wdActive{border-color:#d8b4fe!important;background:#42265c!important}
+#wdStudio .wdNotice{color:#f2c69b;font-size:12px}
+#wdStudio .wdRow{display:flex;gap:7px;flex-wrap:wrap}
+#wdStudio .wdRow>*{flex:1}
+#wdStudio .wdHidden{display:none!important}
+@media(max-width:450px){#wdStudio .wdGrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
+
+<section id="wdStudio">
+  <div class="wdTitle">⚡ WD CapCut Studio</div>
+  <div class="wdSub">Edit videos · Create photos · Explore AI tools</div>
+
+  <input id="wdSearch" class="wdSearch" type="search"
+    placeholder="🔎 Search 50+ editing tools">
+
+  <div id="wdGrid" class="wdGrid"></div>
+
+  <div id="wdPanel" class="wdPanel">
+    <b>🎬 Your creative studio</b>
+    <p class="wdSub">Choose a tool above or swipe the bottom toolbar to explore.</p>
+    <label for="wdImport">Import video or photo</label>
+    <input id="wdImport" type="file" accept="video/*,image/*">
+    <div class="wdRow">
+      <button id="wdPlay" class="wdPrimary">▶ Play / Pause</button>
+      <button id="wdReset">↺ Reset effects</button>
+    </div>
+  </div>
+  <div id="wdStatus" class="wdStatus" role="status" aria-live="polite">
+    WD CapCut ready.
+  </div>
+  <p class="wdSub">AI services are identified separately when they require a model or server.</p>
+</section>
+
+<div id="wdBottom" class="wdBottom">
+  <div class="wdHint">← Swipe sideways to discover more editing tools →</div>
+  <div id="wdScroll" class="wdScroll"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const studio=$("wdStudio");
+if(!studio||studio.dataset.started)return;
+studio.dataset.started="1";
+
+const tools=[
+["import","📂","Import Media"],["autoCut","✂️","Auto Cut"],
+["trim","⏱️","Trim"],["split","➗","Split"],
+["clipper","🎬","AI Clipper"],["speed","⏩","Speed"],
+["captions","💬","Captions"],["autoCaption","CC","Auto Caption"],
+["text","T","Text"],["stickers","✨","Stickers"],
+["filter","🎨","Filters"],["adjust","🎚️","Adjust"],
+["enhance","☀️","Auto Enhance"],["retouch","💎","Retouch"],
+["generate","🪄","AI Generate"],["media","🌌","Generate Media"],
+["avatar","🧑‍🎤","AI Avatar"],["photo","📸","AI Photo Editor"],
+["removeBg","🪄","Remove Background"],["autoRemove","🧹","Auto Remove BG"],
+["cover","🖼️","Cover Maker"],["ratio","▣","Aspect Ratio"],
+["background","🌈","Background"],["music","🎵","Music"],
+["volume","🔊","Volume"],["voice","🎙️","Voice Tools"],
+["record","🔴","Shoot & Record"],["recordAvatar","🤖","Record Avatar"],
+["transition","🌊","Transitions"],["effects","💫","Effects"],
+["color","🌈","Color Grading"],["reframe","↔️","Reframe"],
+["noise","🔉","Noise Reduction"],["object","🧽","Object Removal"],
+["templates","🧩","Templates"],["marketing","📈","Marketing Tools"],
+["desktop","🖥️","Desktop Editor"],["export","⬇️","Export"],
+["blur","🌫️","Blur"],["sharpen","🔍","Sharpen"],
+["mirror","↔️","Mirror"],["rotate","🔄","Rotate"],
+["crop","✂️","Crop"],["emoji","😀","Emoji"],
+["subtitle","📝","Subtitles"],["audio","🎧","Audio Tools"],
+["voiceover","🎤","Voiceover"],["story","📱","Story Maker"],
+["thumbnail","🎞️","Thumbnail"],["settings","⚙️","Settings"]
+];
+
+let mediaURL="",mediaFile=null,musicURL="",musicAudio=null;
+let currentTool="",captionNode=null,captionText="";
+let originalVideoFilter="",brightness=100,contrast=100,saturation=100;
+let speed=1,aspect="16 / 9",bg="#080810",rotation=0;
+let recording=null,recordStream=null;
+
+function status(s){$("wdStatus").textContent=s}
+function makeButton(t,small){
+ const b=document.createElement("button");
+ b.className="wdTool";b.dataset.tool=t[0];
+ b.innerHTML='<span class="wdEmoji">'+t[1]+'</span><span>'+t[2]+'</span>';
+ b.addEventListener("click",()=>openTool(t[0]));
+ return b;
+}
+tools.forEach(t=>{
+ $("wdGrid").appendChild(makeButton(t,false));
+ $("wdScroll").appendChild(makeButton(t,true));
+});
+
+$("wdSearch").addEventListener("input",function(){
+ const q=this.value.toLowerCase();
+ [...$("wdGrid").children].forEach((b,i)=>{
+ b.classList.toggle("wdHidden",!tools[i][2].toLowerCase().includes(q));
+ });
+});
+
+function findMedia(){
+ return document.querySelector("video:not(#wdRecorderPreview), #wdStudioMedia")||
+        document.querySelector("#video, video");
+}
+function findImage(){
+ return document.querySelector("#photo, img:not(#wdLogo)");
+}
+function visualTarget(){
+ return findMedia()||findImage();
+}
+function setFilter(){
+ const el=visualTarget();
+ if(el)el.style.filter=
+  "brightness("+brightness+"%) contrast("+contrast+
+  "%) saturate("+saturation+"%)";
+}
+function field(parent,label,element){
+ const wrap=document.createElement("div");
+ const l=document.createElement("label");
+ l.textContent=label;
+ wrap.append(l,element);parent.appendChild(wrap);return element;
+}
+function action(parent,label,fn,primary){
+ const b=document.createElement("button");
+ b.textContent=label;if(primary)b.className="wdPrimary";
+ b.addEventListener("click",fn);parent.appendChild(b);return b;
+}
+function range(parent,label,min,max,value,fn){
+ const x=document.createElement("input");
+ x.type="range";x.min=min;x.max=max;x.value=value;
+ x.addEventListener("input",()=>fn(Number(x.value)));
+ field(parent,label,x);return x;
+}
+function note(parent,text,warning){
+ const p=document.createElement("p");
+ p.className=warning?"wdNotice":"wdSub";p.textContent=text;
+ parent.appendChild(p);
+}
+function overlay(text){
+ captionText=text;
+ let host=visualTarget();
+ if(!host){status("Import media first.");return}
+ let parent=host.parentElement||host;
+ if(!captionNode||!captionNode.isConnected){
+  captionNode=document.createElement("div");
+  captionNode.style.cssText=
+   "position:absolute;z-index:8;left:4%;right:4%;bottom:12%;"+
+   "text-align:center;color:white;font-size:clamp(20px,5vw,38px);"+
+   "font-weight:900;text-shadow:2px 2px 4px black;white-space:pre-wrap;"+
+   "pointer-events:none";
+  if(getComputedStyle(parent).position==="static")parent.style.position="relative";
+  parent.appendChild(captionNode);
+ }
+ captionNode.textContent=text;
+}
+function openTool(id){
+ currentTool=id;
+ document.querySelectorAll("#wdStudio .wdTool,#wdBottom .wdTool")
+ .forEach(b=>b.classList.toggle("wdActive",b.dataset.tool===id));
+ const p=$("wdPanel");p.innerHTML="";
+ const t=tools.find(x=>x[0]===id);
+ const h=document.createElement("b");h.textContent=t[1]+" "+t[2];p.appendChild(h);
+
+ if(id==="import"){
+  const input=document.createElement("input");input.type="file";
+  input.accept="video/*,image/*";
+  field(p,"Choose media from your phone",input);
+  input.onchange=()=>loadMedia(input.files[0]);
+  return;
+ }
+ if(["captions","text","subtitle","emoji"].includes(id)){
+  const x=document.createElement("textarea");x.rows=3;
+  x.placeholder="Type your caption or title…";x.value=captionText;
+  field(p,"Text overlay",x);
+  action(p,"Apply text",()=>overlay(x.value),true);
+  action(p,"Clear text",()=>{if(captionNode)captionNode.remove();captionNode=null;captionText="";status("Text cleared.")});
+  if(id==="emoji")note(p,"Add an emoji to your text, then tap Apply text.");
+  return;
+ }
+ if(["filter","adjust","color","enhance","retouch","sharpen","blur"].includes(id)){
+  if(id==="filter"){
+   [["Normal",100,100,100],["Warm",105,110,120],
+    ["Black & White",100,115,0],["Vivid",105,115,155],
+    ["Soft",108,90,110],["Cool",100,105,115]].forEach(a=>
+      action(p,a[0],()=>{brightness=a[1];contrast=a[2];saturation=a[3];setFilter();status(a[0]+" preview applied.")}));
+  }else{
+   range(p,"Brightness",50,160,brightness,v=>{brightness=v;setFilter()});
+   range(p,"Contrast",50,160,contrast,v=>{contrast=v;setFilter()});
+   range(p,"Saturation",0,200,saturation,v=>{saturation=v;setFilter()});
+   action(p,"Reset adjustments",()=>{brightness=contrast=saturation=100;setFilter();openTool(id)});
+   if(["retouch","enhance"].includes(id))note(p,
+    "These are basic visual adjustments, not AI skin retouch or AI enhancement.",true);
+   if(["sharpen","blur"].includes(id))note(p,
+    "Advanced blur or sharpening needs a dedicated image-processing engine.",true);
+  }
+  return;
+ }
+ if(["ratio","reframe","crop"].includes(id)){
+  [["Landscape 16:9","16 / 9"],["Portrait 9:16","9 / 16"],["Square 1:1","1 / 1"]].forEach(a=>
+   action(p,a[0],()=>{const host=visualTarget();if(host&&host.parentElement){
+    host.parentElement.style.aspectRatio=a[1];host.parentElement.style.overflow="hidden";
+    host.style.objectFit="contain";
+   }aspect=a[1];status("Preview ratio changed to "+a[0])}));
+  return;
+ }
+ if(id==="background"){
+  [["Black","#080810"],["Purple","#29123f"],["Blue","#0c2948"],
+   ["Pink","#501735"],["Green","#10372d"],["White","#eeeeee"]].forEach(a=>
+   action(p,a[0],()=>{bg=a[1];const host=visualTarget();if(host&&host.parentElement)host.parentElement.style.background=bg;status("Preview background changed.")}));
+  return;
+ }
+ if(["stickers","effects"].includes(id)){
+  ["✨","❤️","🔥","⭐","😂","⚡","👑","💯","🎮","💥"].forEach(s=>
+   action(p,s,()=>overlay(captionText+(captionText?" ":"")+s)));
+  return;
+ }
+ if(id==="speed"){
+  const v=findMedia();
+  range(p,"Playback speed",25,200,speed*100,n=>{
+   speed=n/100;if(v&&v.tagName==="VIDEO")v.playbackRate=speed;
+   status("Playback speed: "+speed.toFixed(2)+"×");
+  });return;
+ }
+ if(id==="volume"){
+  const v=findMedia();
+  if(v&&v.tagName==="VIDEO"){
+   range(p,"Clip volume",0,100,v.volume*100,n=>{v.volume=n/100;status("Volume "+n+"%")});
+   action(p,"Mute / Unmute",()=>{v.muted=!v.muted;status(v.muted?"Muted":"Sound enabled")});
+  }else note(p,"Import a video to adjust its volume.");
+  return;
+ }
+ if(id==="music"||id==="audio"){
+  const input=document.createElement("input");input.type="file";input.accept="audio/*";
+  field(p,"Choose audio from your device",input);
+  input.onchange=()=>{
+   const f=input.files[0];if(!f)return;
+   if(musicURL)URL.revokeObjectURL(musicURL);
+   musicURL=URL.createObjectURL(f);
+   if(musicAudio)musicAudio.pause();
+   musicAudio=new Audio(musicURL);musicAudio.loop=true;
+   status("Music loaded: "+f.name);
+  };
+  action(p,"Play / Pause music",()=>{
+   if(!musicAudio){status("Choose an audio file first.");return}
+   if(musicAudio.paused)musicAudio.play().catch(()=>status("Tap again to allow audio."));
+   else musicAudio.pause();
+  });
+  action(p,"Remove music",()=>{if(musicAudio)musicAudio.pause();musicAudio=null;if(musicURL)URL.revokeObjectURL(musicURL);musicURL="";status("Music removed.")});
+  note(p,"Music preview works. Combining music with an exported video needs a full audio/video rendering engine.",true);
+  return;
+ }
+ if(id==="trim"||id==="clipper"||id==="autoCut"||id==="split"){
+  const v=findMedia();
+  if(!v||v.tagName!=="VIDEO"){note(p,"Import a video first.");return}
+  const start=document.createElement("input");start.type="number";start.min=0;start.step=".1";start.value=0;
+  const end=document.createElement("input");end.type="number";end.min=0;end.step=".1";end.value=v.duration||0;
+  field(p,"Start seconds",start);field(p,"End seconds",end);
+  if(id==="autoCut")end.value=Math.min(v.duration||15,15);
+  action(p,"Apply trim range",()=>{
+   const a=Math.max(0,Number(start.value)||0),b=Math.min(v.duration,Number(end.value)||v.duration);
+   if(b<=a){status("End must be after start.");return}
+   v.currentTime=a;v.dataset.wdTrimStart=a;v.dataset.wdTrimEnd=b;
+   status("Trim range selected: "+a+"–"+b+" seconds. Use Export to render if supported.");
+  },true);
+  if(id==="split")action(p,"Mark split at playhead",()=>status("Split point marked at "+v.currentTime.toFixed(2)+" seconds. Multiple-clip rendering needs a timeline engine."));
+  note(p,"Trim selection and playhead navigation work; this add-on does not create separate split files.");
+  return;
+ }
+ if(id==="cover"||id==="thumbnail"){
+  action(p,"Save current frame as cover",()=>{
+   const v=findMedia();if(!v||v.tagName!=="VIDEO"||!v.videoWidth){status("Import a video and wait for its preview.");return}
+   const c=document.createElement("canvas");c.width=v.videoWidth;c.height=v.videoHeight;
+   c.getContext("2d").drawImage(v,0,0);
+   c.toBlob(blob=>{if(!blob){status("Could not capture frame.");return}
+    const u=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=u;a.download="WD-CapCut-Cover.png";a.click();
+    setTimeout(()=>URL.revokeObjectURL(u),30000);status("Cover PNG saved.");
+   });
+  },true);return;
+ }
+ if(id==="record"){
+  action(p,"Start camera recording",async()=>{
+   try{
+    recordStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    recording=new MediaRecorder(recordStream);const chunks=[];
+    recording.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+    recording.onstop=()=>{
+     const u=URL.createObjectURL(new Blob(chunks,{type:recording.mimeType||"video/webm"}));
+     const a=document.createElement("a");a.href=u;a.download="WD-CapCut-Recording.webm";a.click();
+     setTimeout(()=>URL.revokeObjectURL(u),30000);
+     recordStream.getTracks().forEach(t=>t.stop());status("Recording saved.");
+    };
+    recording.start();status("Recording started. Tap Stop recording when done.");
+    action(p,"Stop recording",()=>{if(recording&&recording.state!=="inactive")recording.stop()},true);
+   }catch(e){status("Camera unavailable. Use HTTPS and allow camera access.");}
+  },true);return;
+ }
+ if(id==="voice"||id==="voiceover"){
+  const x=document.createElement("textarea");x.placeholder="Type words to speak…";field(p,"Text to speech",x);
+  action(p,"Speak text",()=>{
+   if(!("speechSynthesis" in window)){status("Text-to-speech is not supported here.");return}
+   speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(x.value));
+  },true);return;
+ }
+ if(id==="marketing"||id==="story"||id==="templates"){
+  const x=document.createElement("textarea");x.rows=3;
+  x.value=id==="marketing"?"New edit 🔥✨ #WDCapCut #VideoEdit #Creator":"Made with WD CapCut ✨";
+  field(p,"Your text",x);
+  action(p,"Select text to copy",()=>{x.focus();x.select();status("Text selected. Copy using your phone's menu.")});
+  if(id==="templates")note(p,"Use Filters and Adjust to apply a look to your preview.");
+  return;
+ }
+ if(id==="mirror"||id==="rotate"){
+  const host=visualTarget();if(!host){note(p,"Import media first.");return}
+  action(p,"Flip horizontally",()=>{rotation=rotation===0?180:0;host.style.transform="scaleX("+ (rotation===0?1:-1)+")"});
+  action(p,"Rotate 90°",()=>{rotation+=90;host.style.transform="rotate("+rotation+"deg)";});
+  return;
+ }
+ if(["generate","media","avatar","photo","removeBg","autoRemove","object","noise","transition","desktop","recordAvatar"].includes(id)){
+  note(p,"This feature requires an AI model, server integration, or advanced media engine. It is listed here, but it is not falsely presented as a working AI feature.",true);
+  if(id==="photo")note(p,"For now, import a photo and use Filters, Adjust, Text and Stickers.");
+  if(id==="desktop")note(p,"A browser page cannot become a full desktop editor without a separate desktop application.");
+  return;
+ }
+ if(id==="export"){
+  const v=findMedia();
+  action(p,"Save original media",()=>{
+   if(!mediaURL){status("Import media through WD CapCut first.");return}
+   const a=document.createElement("a");a.href=mediaURL;a.download=mediaFile.name;a.click();
+  });
+  if(v&&v.tagName==="VIDEO")note(p,"Use the original editor's export button if it provides video rendering. This add-on does not promise an MP4 renderer.");
+  else note(p,"Import a video to use video export.");
+  return;
+ }
+ if(id==="settings"){
+  note(p,"WD CapCut tool library settings.");
+  action(p,"Reset preview effects",()=>{brightness=contrast=saturation=100;setFilter();status("Preview effects reset.")});
+  return;
+ }
+ note(p,"This tool is included in the library. Advanced processing needs an appropriate media or AI engine.");
+}
+function loadMedia(file){
+ if(!file)return;
+ const old=document.getElementById("wdStudioMedia");
+ if(old)old.remove();
+ const oldImg=document.getElementById("wdStudioImage");
+ if(oldImg)oldImg.remove();
+ if(mediaURL)URL.revokeObjectURL(mediaURL);
+ mediaFile=file;mediaURL=URL.createObjectURL(file);
+ const host=$("wdPanel");
+ if(file.type.startsWith("video/")){
+  const v=document.createElement("video");v.id="wdStudioMedia";v.src=mediaURL;v.controls=true;v.playsInline=true;
+  v.style.cssText="display:block;width:100%;max-height:55vh;object-fit:contain;background:#050509;margin-top:12px;border-radius:10px";
+  host.appendChild(v);
+ }else if(file.type.startsWith("image/")){
+  const img=document.createElement("img");img.id="wdStudioImage";img.src=mediaURL;img.alt="Imported photo";
+  img.style.cssText="display:block;width:100%;max-height:55vh;object-fit:contain;background:#050509;margin-top:12px;border-radius:10px";
+  host.appendChild(img);
+ }else{status("Choose a supported video or image.");return}
+ captionNode=null;status("Imported "+file.name+". Choose an editing tool.");
+}
+$("wdImport").addEventListener("change",e=>loadMedia(e.target.files[0]));
+$("wdPlay").addEventListener("click",()=>{
+ const v=findMedia();
+ if(!v||v.tagName!=="VIDEO"){status("Import a video first.");return}
+ if(v.paused)v.play().catch(()=>status("Tap Play on the video preview."));
+ else v.pause();
+});
+$("wdReset").addEventListener("click",()=>{
+ brightness=contrast=saturation=100;speed=1;
+ const v=findMedia();if(v){v.style.filter="";if(v.tagName==="VIDEO")v.playbackRate=1}
+ const im=findImage();if(im)im.style.filter="";
+ if(captionNode)captionNode.remove();captionNode=null;captionText="";
+ status("Preview effects reset.");
+});
+window.addEventListener("beforeunload",()=>{
+ if(mediaURL)URL.revokeObjectURL(mediaURL);
+ if(musicURL)URL.revokeObjectURL(musicURL);
+ if(musicAudio)musicAudio.pause();
+});
+status("WD CapCut tool library loaded.");
+})();
 </script>
+
 </script>
 </body>
 </html>
