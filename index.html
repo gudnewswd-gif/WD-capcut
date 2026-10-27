@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101116">
+<title>WD Cap Cut 🧢 Cut — Video Studio</title>
+<style>
+:root{color-scheme:dark;--bg:#101116;--panel:#1a1b24;--line:#343545;--muted:#a9adbf;--accent:#a78bfa;--text:#f7f7fc}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:20px 16px 16px;background:#181521;border-bottom:1px solid var(--line)}header h1{margin:0;font-size:25px}header p{margin:5px 0 0;color:var(--muted);font-size:13px}
+main{max-width:960px;margin:auto;padding:14px;display:grid;gap:14px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;min-width:0}.panel h2{font-size:16px;margin:0 0 12px}
+.preview{position:relative;display:grid;place-items:center;min-height:190px;background:#07080b;border-radius:12px;overflow:hidden}
+video{display:block;max-width:100%;max-height:55vh;background:#07080b}#empty{text-align:center;color:var(--muted);padding:36px 14px}#textLayer{position:absolute;left:50%;transform:translate(-50%,-50%);width:90%;text-align:center;font-weight:800;white-space:pre-wrap;text-shadow:0 2px 6px #000;pointer-events:none}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.row>*{flex:1;min-width:110px}
+button,.filelabel{display:inline-block;text-align:center;border:1px solid var(--line);border-radius:10px;background:#292a38;color:var(--text);padding:10px 12px;font:inherit;cursor:pointer}button.primary{background:var(--accent);color:#181226;border-color:var(--accent);font-weight:750}button:disabled{opacity:.45}
+input,select,textarea{width:100%;background:#101116;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px;font:inherit;min-width:0}input[type=range]{padding:0;accent-color:var(--accent)}input[type=file]{display:none}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:grid;gap:6px;min-width:0}.field label{font-size:12px;color:var(--muted)}.full{grid-column:1/-1}.muted{font-size:12px;color:var(--muted)}.status{background:#11121a;border-radius:9px;padding:10px;font-size:12px;color:#d6d1ee;overflow-wrap:anywhere}
+a{color:#c4b5fd}footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 14px 26px}
+@media(min-width:760px){main{grid-template-columns:1.1fr .9fr;align-items:start}.previewPanel{grid-row:span 2}.exportPanel{grid-column:2}}
+@media(max-width:420px){.grid{grid-template-columns:1fr}.full{grid-column:auto}header h1{font-size:22px}}
+</style>
+</head>
+<body>
+<header><h1>🧢 WD Cap Cut</h1><p>Video Studio · Make your moments stand out</p></header>
+<main>
+<section class="panel previewPanel">
+<h2>Video preview</h2>
+<div class="preview">
+<video id="video" playsinline preload="metadata"></video>
+<div id="empty">🎬<br><strong>Choose a video to start</strong><br><span class="muted">Your video stays on this device in this starter version.</span></div>
+<div id="textLayer"></div>
+</div>
+<div class="row"><button id="play" class="primary" disabled>▶ Play</button><button id="pause" disabled>⏸ Pause</button><button id="restart" disabled>↺ Restart</button></div>
+<div class="field" style="margin-top:12px"><label for="seek">Position · <span id="clock">00:00 / 00:00</span></label><input id="seek" type="range" min="0" max="100" value="0" disabled></div>
+<div class="status" id="status" style="margin-top:10px">Choose a video file to begin.</div>
+</section>
+
+<section class="panel">
+<h2>1 · Add your media</h2>
+<div class="field"><label class="filelabel">🎥 Choose video<input id="videoFile" type="file" accept="video/*"></label></div>
+<div class="field" style="margin-top:10px"><label class="filelabel">🎵 Choose background music<input id="audioFile" type="file" accept="audio/*"></label></div>
+<div class="row"><button id="musicPlay" disabled>▶ Music</button><button id="musicStop" disabled>■ Stop music</button></div>
+</section>
+
+<section class="panel">
+<h2>2 · Edit your video</h2>
+<div class="grid">
+<div class="field"><label for="filter">Filter</label><select id="filter"><option value="none">Original</option><option value="contrast(1.15) saturate(1.25)">Vibrant</option><option value="grayscale(1)">Black & white</option><option value="sepia(.8)">Vintage</option><option value="brightness(1.15)">Bright</option><option value="contrast(1.3)">High contrast</option></select></div>
+<div class="field"><label for="speed">Speed</label><select id="speed"><option value=".5">0.5×</option><option value=".75">0.75×</option><option value="1" selected>1× normal</option><option value="1.5">1.5×</option><option value="2">2×</option></select></div>
+<div class="field full"><label for="trimStart">Trim start (seconds)</label><input id="trimStart" type="number" min="0" step=".1" value="0"></div>
+<div class="field full"><label for="trimEnd">Trim end (seconds)</label><input id="trimEnd" type="number" min="0" step=".1" value="0"></div>
+<div class="field full"><button id="previewTrim" disabled>▶ Preview trimmed section</button></div>
+<div class="field full"><label for="caption">Text / caption overlay</label><input id="caption" maxlength="150" placeholder="Type your video title"></div>
+<div class="field"><label for="textSize">Text size</label><input id="textSize" type="range" min="14" max="60" value="30"></div>
+<div class="field"><label for="textColor">Text colour</label><input id="textColor" type="color" value="#ffffff"></div>
+<div class="field full"><label for="textPos">Caption position</label><select id="textPos"><option value="15%">Top</option><option value="50%" selected>Middle</option><option value="85%">Bottom</option></select></div>
+<div class="field full"><label for="videoVol">Video volume <span id="vv">70%</span></label><input id="videoVol" type="range" min="0" max="100" value="70"></div>
+<div class="field full"><label for="musicVol">Music volume <span id="mv">30%</span></label><input id="musicVol" type="range" min="0" max="100" value="30"></div>
+</div>
+</section>
+
+<section class="panel exportPanel">
+<h2>3 · Export</h2>
+<p class="muted">Export records the edited preview to WebM when supported by your browser. Try a short video first. This starter export does not mix the separate music track.</p>
+<div class="field"><label for="filename">File name</label><input id="filename" value="WD-Cap-Cut-Video"></div>
+<div class="field" style="margin-top:10px"><label for="quality">Export quality</label><select id="quality"><option value="1800000">Standard</option><option value="3500000">High</option></select></div>
+<div class="row"><button id="export" class="primary" disabled>⬇ Export WebM</button></div>
+<div id="exportStatus" class="status" style="margin-top:10px">Load a video to enable export.</div>
+<a id="download" hidden download="WD-Cap-Cut-Video.webm">Download your video</a>
+</section>
+
+<section class="panel">
+<h2>4 · More tools</h2>
+<button id="preset">✨ Apply vibrant preset</button>
+<p class="muted">This is the first version of WD Cap Cut. Automatic captions, AI background removal, multiple-clip timelines, transitions and audio-mixed exports still need to be built and tested.</p>
+</section>
+</main>
+<footer>WD Cap Cut 🧢 · New project · Version 1</footer>
+<script>
+(()=>{
+const $=id=>document.getElementById(id),v=$('video');
+let videoURL='',audioURL='',audio=null,raf=0,exportURL='';
+const fmt=n=>{n=Math.max(0,Math.floor(Number(n)||0));return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')};
+function say(t){$('status').textContent=t}
+function effects(){
+v.style.filter=$('filter').value==='none'?'none':$('filter').value;
+v.playbackRate=Number($('speed').value);
+$('textLayer').textContent=$('caption').value;
+$('textLayer').style.fontSize=$('textSize').value+'px';
+$('textLayer').style.color=$('textColor').value;
+$('textLayer').style.top=$('textPos').value;
+$('textLayer').style.display=$('caption').value.trim()?'block':'none';
+}
+function clock(){if(Number.isFinite(v.duration)){$('clock').textContent=fmt(v.currentTime)+' / '+fmt(v.duration);$('seek').value=v.duration?v.currentTime/v.duration*100:0}}
+$('videoFile').addEventListener('change',e=>{
+ const f=e.target.files&&e.target.files[0];if(!f)return;
+ if(videoURL)URL.revokeObjectURL(videoURL);
+ videoURL=URL.createObjectURL(f);v.src=videoURL;v.load();say('Loading '+f.name+'…');
+});
+v.addEventListener('loadedmetadata',()=>{
+ $('empty').hidden=true;
+ ['play','pause','restart','seek','previewTrim','export'].forEach(id=>$(id).disabled=false);
+ $('trimStart').value=0;$('trimEnd').value=v.duration.toFixed(1);
+ say('Video ready: '+v.videoWidth+'×'+v.videoHeight+' · '+fmt(v.duration));
+ effects();clock();
+});
+v.addEventListener('error',()=>say('This video format could not be opened. Try another video.'));
+$('play').onclick=async()=>{try{await v.play()}catch(e){say('Playback failed: '+e.message)}};
+$('pause').onclick=()=>v.pause();
+$('restart').onclick=()=>{v.currentTime=0;v.play().catch(()=>{})};
+v.addEventListener('timeupdate',()=>{
+ clock();
+ const end=Number($('trimEnd').value);
+ if(!v.paused&&end>Number($('trimStart').value)&&v.currentTime>=end){v.pause()}
+});
+$('seek').oninput=()=>{if(v.duration)v.currentTime=v.duration*Number($('seek').value)/100};
+$('previewTrim').onclick=()=>{const s=Math.max(0,Number($('trimStart').value)||0),e=Number($('trimEnd').value)||v.duration;if(e<=s){say('End time must be after start time.');return}v.currentTime=s;v.play().catch(()=>say('Could not play the trimmed section.'))};
+['filter','speed','caption','textSize','textColor','textPos'].forEach(id=>$(id).addEventListener('input',effects));
+$('videoVol').oninput=()=>{$('vv').textContent=$('videoVol').value+'%';v.volume=Number($('videoVol').value)/100};
+$('musicVol').oninput=()=>{ $('mv').textContent=$('musicVol').value+'%';if(audio)audio.volume=Number($('musicVol').value)/100};
+v.volume=.7;
+$('audioFile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;if(audioURL)URL.revokeObjectURL(audioURL);audioURL=URL.createObjectURL(f);if(audio)audio.pause();audio=new Audio(audioURL);audio.loop=true;audio.volume=Number($('musicVol').value)/100;$('musicPlay').disabled=false;$('musicStop').disabled=false;say('Music loaded: '+f.name)});
+$('musicPlay').onclick=async()=>{if(!audio)return;try{if(audio.paused){await audio.play();$('musicPlay').textContent='⏸ Pause music'}else{audio.pause();$('musicPlay').textContent='▶ Music'}}catch(e){say('Music playback failed: '+e.message)}};
+$('musicStop').onclick=()=>{if(audio){audio.pause();audio.currentTime=0;$('musicPlay').textContent='▶ Music'}};
+$('preset').onclick=()=>{$('filter').value='contrast(1.15) saturate(1.25)';effects();say('Vibrant preset applied.')};
+$('export').onclick=async()=>{
+ if(!v.videoWidth||!v.src)return;
+ if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){$('exportStatus').textContent='Video export is not supported by this browser.';return}
+ const start=Math.max(0,Number($('trimStart').value)||0),end=Number($('trimEnd').value)||v.duration;
+ if(end<=start||end>v.duration+.1){$('exportStatus').textContent='Please check your trim start and end times.';return}
+ let stream,rec=null,parts=[];
+ try{
+ $('export').disabled=true;$('exportStatus').textContent='Preparing export…';
+ const c=document.createElement('canvas'),cx=c.getContext('2d');
+ const rotated=[90,270].includes(Number($('rotate')?.value||0));
+ c.width=1280;c.height=720;
+ const draw=()=>{
+  if(v.readyState>=2&&v.videoWidth){
+   cx.clearRect(0,0,c.width,c.height);cx.fillStyle='#000';cx.fillRect(0,0,c.width,c.height);
+   cx.save();cx.filter=$('filter').value==='none'?'none':$('filter').value;
+   const scale=Math.min(c.width/v.videoWidth,c.height/v.videoHeight)*1;
+   cx.drawImage(v,(c.width-v.videoWidth*scale)/2,(c.height-v.videoHeight*scale)/2,v.videoWidth*scale,v.videoHeight*scale);cx.restore();
+   const text=$('caption').value.trim();if(text){cx.font='bold '+Number($('textSize').value)+'px system-ui';cx.textAlign='center';cx.textBaseline=$('textPos').value==='15%'?'top':$('textPos').value==='85%'?'bottom':'middle';cx.lineWidth=3;cx.strokeStyle='#000';cx.fillStyle=$('textColor').value;cx.strokeText(text,c.width/2,$('textPos').value==='15%'?40:$('textPos').value==='85%'?c.height-40:c.height/2,c.width*.9);cx.fillText(text,c.width/2,$('textPos').value==='15%'?40:$('textPos').value==='85%'?c.height-40:c.height/2,c.width*.9)}
+  }
+ };
+ const paint=()=>{draw();if(rec&&rec.state==='recording')requestAnimationFrame(paint)};
+ await new Promise((resolve,reject)=>{v.currentTime=start;const timer=setTimeout(()=>reject(Error('Video seek timed out')),6000);v.addEventListener('seeked',()=>{clearTimeout(timer);resolve()},{once:true})});
+ stream=c.captureStream(30);
+ let mime='video/webm;codecs=vp9';if(!MediaRecorder.isTypeSupported(mime))mime='video/webm;codecs=vp8';if(!MediaRecorder.isTypeSupported(mime))mime='video/webm';
+ rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:Number($('quality').value)});
+ rec.ondataavailable=e=>{if(e.data&&e.data.size)parts.push(e.data)};
+ rec.onerror=()=>{$('exportStatus').textContent='Recording failed. Try a shorter video.'};
+ rec.onstop=()=>{stream.getTracks().forEach(t=>t.stop());$('export').disabled=false;if(!parts.length){$('exportStatus').textContent='No video data produced. Try Chrome and a shorter clip.';return}const blob=new Blob(parts,{type:'video/webm'});if(exportURL)URL.revokeObjectURL(exportURL);exportURL=URL.createObjectURL(blob);const a=$('download');a.href=exportURL;a.download=(($('filename').value.trim()||'WD-Cap-Cut-Video').replace(/[^\w-]+/g,'-'))+'.webm';a.hidden=false;a.style.display='block';a.style.marginTop='12px';a.textContent='⬇ Download video ('+(blob.size/1048576).toFixed(1)+' MB)';$('exportStatus').textContent='Export finished. Download your WebM video below.'};
+ rec.start(250);await v.play();paint();$('exportStatus').textContent='Recording edited video in real time…';
+ const finish=()=>{if(rec&&rec.state!=='inactive')rec.stop();v.pause();$('exportStatus').textContent='Finishing export…'};
+ const check=()=>{if(v.currentTime>=end){v.removeEventListener('timeupdate',check);finish()}};
+ v.addEventListener('timeupdate',check);
+ v.addEventListener('ended',finish,{once:true});
+ }catch(err){$('export').disabled=false;$('exportStatus').textContent='Export could not start: '+err.message+'. Try Chrome and a short video.'}
+};
+window.addEventListener('beforeunload',()=>{if(videoURL)URL.revokeObjectURL(videoURL);if(audioURL)URL.revokeObjectURL(audioURL);if(exportURL)URL.revokeObjectURL(exportURL);if(audio)audio.pause()});
+})();
+</script>
+</body>
+</html>
